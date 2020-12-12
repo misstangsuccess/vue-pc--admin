@@ -1,8 +1,17 @@
 <template>
   <div>
+    <!-- 添加按钮 -->
     <el-button type="primary" icon="el-icon-plus" @click="visible = true"
       >添加</el-button
     >
+    <!--
+          .sync用于父子通信(子向父)
+          :count.sync="count" 给子组件传递xxx数据以及更新数据的方法update:xxx
+           相当于:count="count" @update:count="xxx"
+         -->
+    <Test :count.sync="count" />
+    <!-- <Test :count="count" :add="add" /> -->
+    <!-- 商品展示列表 -->
     <el-table :data="trademarkList" border style="width: 100%; margin: 20px 0">
       <el-table-column type="index" label="序号" width="80" align="center">
       </el-table-column>
@@ -15,10 +24,16 @@
       <el-table-column label="操作">
         <template>
           <el-button type="warning" icon="el-icon-edit">修改</el-button>
-          <el-button type="danger" icon="el-icon-delete">删除</el-button>
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            @click="delTrade(trademarkList)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页器 -->
     <el-pagination
       class="trademark-pagination"
       @size-change="getPageList(page, $event)"
@@ -30,7 +45,9 @@
       :total="total"
     >
     </el-pagination>
+    <!-- 对话框 -->
     <el-dialog title="添加品牌" :visible.sync="visible" width="50%">
+      <!-- form表单 -->
       <el-form
         :model="trademarkForm"
         :rules="rules"
@@ -47,10 +64,14 @@
               目标服务器地址: 代理配置中 (vue.config.js)
 
             不允许跨域，就使用proxy
+            # base api
+            VUE_APP_BASE_API = '/dev-api'
+
               action="/dev-api/admin/product/fileUpload"
               /dev-api -> request.js 代理
              在main.js中定义 Vue.prototype.$BASE_API = process.env.VUE_APP_BASE_API
            -->
+          <!-- 上传框 -->
           <el-upload
             class="avatar-uploader"
             :action="`${$BASE_API}/admin/product/fileUpload`"
@@ -79,10 +100,12 @@
 </template>
 
 <script>
+import Test from './test';
 export default {
   name: 'TrademarkList',
   data() {
     return {
+      count: 0,
       trademarkList: [],
       total: 0,
       page: 1,
@@ -101,6 +124,7 @@ export default {
             trigger: 'blur',
           },
         ],
+        //图片格式验证规
         logoUrl: [
           {
             required: true,
@@ -111,27 +135,48 @@ export default {
     };
   },
   methods: {
+    add() {
+      this.count++;
+    },
     //获取动态数据展示,并操作分页器
     async getPageList(page, limit) {
       //由于在main.js中把所有api中的请求都引入过去了,并重命为API,
       //而且还在Vue的原型上定义了$APIP这个方法,所以组件中可以使用了
-      try {
-        const result = await this.$API.trademark.getPageList(page, limit);
-        console.log(result);
-        if (result.code === 200) {
-          this.$message.success('获取品牌分布列表成功');
-          //获取数据
-          this.page = result.data.current; //当前页码
-          this.limit = result.data.size; //每页条数
-          this.total = result.data.total; //总页数
-          this.trademarkList = result.data.records; //品牌列表
-        } else {
-          this.$message.error('获取品牌列表失败');
-        }
-      } catch (e) {
-        console.log(e);
+      const result = await this.$API.trademark.getPageList(page, limit);
+      //console.log(result);
+      if (result.code === 200) {
+        this.$message.success('获取品牌分布列表成功');
+        //获取数据
+        this.page = result.data.current; //当前页码
+        this.limit = result.data.size; //每页条数
+        this.total = result.data.total; //总页数
+        this.trademarkList = result.data.records; //品牌列表
+      } else {
         this.$message.error('获取品牌列表失败');
       }
+    },
+    //文件上传之前的回调函数
+    beforeAvatarUpload(file) {
+      //声明图片格式
+      const imgTypes = ['image/jpg', 'image/png', 'image/jpeg'];
+      //判断图片格式
+      const isValidTypes = imgTypes.indexOf(file.type) > -1;
+      //检测文件大小
+      const isLt = file.seze > 1024 < 50;
+      //判断是否上传成功
+      if (!isValidTypes) {
+        this.$message.error('只能上传jpg/png文件格式');
+      }
+      if (!isLt) {
+        this.$message.error('文件大小不超过50kb');
+      }
+      //返回结果
+      return isValidTypes && isLt;
+    },
+    //文件上传成功的回调函数
+    handleAvatarSuccess(res) {
+     // console.log(res);
+      this.trademarkForm.logoUrl = res.data;
     },
     //提交表单
     submitForm(form) {
@@ -155,32 +200,45 @@ export default {
         }
       });
     },
-    //文件上传成功的回调函数
-    handleAvatarSuccess(res) {
-      console.log(res);
-      this.trademarkForm.logoUrl = res.data;
-    },
-    //文件上传之前的回调函数
-    beforeAvatarUpload(file) {
-      //声明图片格式
-      const imgTypes = ['image/jpg', 'image/png', 'image/jpeg'];
-      //判断图片格式
-      const isValidTypes = imgTypes.indexOf(file.type) > -1;
-      //检测文件大小
-      const isLt = file.seze > 1025 < 50;
-      //判断是否上传成功
-      if (!isValidTypes) {
-        this.$message.error('只能上传jpg/png文件格式');
-      }
-      if (!isLt) {
-        this.$message.error('文件大小不超过50kb');
-      }
-      //返回结果
-      return isValidTypes && isLt;
+
+    //删除品牌数据
+    delTrade(trademarkList) {
+      this.$confirm(`你确定要删除${trademarkList.tmName}吗?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(async () => {
+          //发送请求
+          const result = await this.$API.trademark.delTradeMark(
+            trademarkForm.id
+          );
+          if (result.code === 200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
+            this.getPageList(this.page, this.limit);
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败!',
+            });
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除',
+          });
+        });
     },
   },
   mounted() {
     this.getPageList(this.page, this.limit);
+  },
+  components: {
+    Test,
   },
 };
 </script>
