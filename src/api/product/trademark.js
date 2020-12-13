@@ -31,7 +31,7 @@ export default {
   //删除品牌数据
   delTradeMark (id) {
     return request({
-      url: `${api_name}/remove${id}`,
+      url: `${api_name}/remove/${id}`,
       method: 'DELETE',
     })
   },

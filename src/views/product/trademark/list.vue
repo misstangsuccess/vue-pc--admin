@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- 添加按钮 -->
-    <el-button type="primary" icon="el-icon-plus" @click="visible = true"
+    <el-button type="primary" icon="el-icon-plus" @click="addBtn"
       >添加</el-button
     >
     <!--
@@ -12,7 +12,12 @@
     <Test :count.sync="count" />
     <!-- <Test :count="count" :add="add" /> -->
     <!-- 商品展示列表 -->
-    <el-table :data="trademarkList" border style="width: 100%; margin: 20px 0">
+    <el-table
+      :data="trademarkList"
+      v-loading="loading"
+      border
+      style="width: 100%; margin: 20px 0"
+    >
       <el-table-column type="index" label="序号" width="80" align="center">
       </el-table-column>
       <el-table-column prop="tmName" label="品牌名称"> </el-table-column>
@@ -22,12 +27,11 @@
         </template>
       </el-table-column>
       <el-table-column label="操作">
-        <template>
-          <el-button type="warning" icon="el-icon-edit">修改</el-button>
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            @click="delTrade(trademarkList)"
+        <template v-slot="{ row }">
+          <el-button type="warning" icon="el-icon-edit" @click="update(row)"
+            >修改</el-button
+          >
+          <el-button type="danger" icon="el-icon-delete" @click="delTrade(row)"
             >删除</el-button
           >
         </template>
@@ -46,7 +50,11 @@
     >
     </el-pagination>
     <!-- 对话框 -->
-    <el-dialog title="添加品牌" :visible.sync="visible" width="50%">
+    <el-dialog
+      :title="`${trademarkForm.id ? '修改' : '添加'}品牌`"
+      :visible.sync="visible"
+      width="50%"
+    >
       <!-- form表单 -->
       <el-form
         :model="trademarkForm"
@@ -111,6 +119,7 @@ export default {
       page: 1,
       limit: 3,
       visible: false, //对话框隐藏
+      loading: false,
       trademarkForm: {
         tmName: '',
         logoUrl: '',
@@ -119,8 +128,10 @@ export default {
       rules: {
         tmName: [
           {
-            required: true,
-            message: '请输入品牌名称',
+            //也可以自定义验证规则
+            validator: this.validator,
+            /* required: true,
+            message: '请输入品牌名称', */
             trigger: 'blur',
           },
         ],
@@ -135,11 +146,23 @@ export default {
     };
   },
   methods: {
+    //自定义校验规则
+    validator(rule, value, callback) {
+      if (!value) {
+        callback(new Error('请输入品牌名称'));
+      } else if (value.length > 2 && value.length > 10) {
+        callback(new Error('输入品牌名称的长度应为2-10位'));
+        return;
+      }
+      callback();
+    },
+    //.sync操作
     add() {
       this.count++;
     },
     //获取动态数据展示,并操作分页器
     async getPageList(page, limit) {
+      this.loading = true;
       //由于在main.js中把所有api中的请求都引入过去了,并重命为API,
       //而且还在Vue的原型上定义了$APIP这个方法,所以组件中可以使用了
       const result = await this.$API.trademark.getPageList(page, limit);
@@ -154,6 +177,7 @@ export default {
       } else {
         this.$message.error('获取品牌列表失败');
       }
+      this.loading = false;
     },
     //文件上传之前的回调函数
     beforeAvatarUpload(file) {
@@ -175,18 +199,61 @@ export default {
     },
     //文件上传成功的回调函数
     handleAvatarSuccess(res) {
-     // console.log(res);
+      // console.log(res);
       this.trademarkForm.logoUrl = res.data;
+    },
+    //添加完数据后清空数据
+    addBtn() {
+      //清空表单验证
+      this.$refs.trademarkForm && this.$refs.trademarkForm.clearValidate();
+      this.visible = true;
+      this.trademarkForm = {
+        tmName: '',
+        logoUrl: '',
+      };
+    },
+    //更新数据
+    update(row) {
+      //清空表单验证
+      this.$refs.trademarkForm && this.$refs.trademarkForm.clearValidate();
+      this.visible = true;
+      //由于地址一样只要修改数据就会触发表单修改,所以复用解构对象的方法,得到一个新的对象进行操作
+      this.trademarkForm = { ...row };
     },
     //提交表单
     submitForm(form) {
       //进行表单验证
       this.$refs[form].validate(async (valid) => {
-        //若检验成功则发送请求
+        //验证是否是修改了数据
         if (valid) {
-          const result = await this.$API.trademark.addTradeMark(
-            this.trademarkForm
-          );
+          //获取数据
+          const { trademarkForm } = this;
+          //!!强制转给布尔值,代表是否更新
+          const isUpdate = !!trademarkForm.id;
+          //若要修改数据就发送请求更新数据
+          if (isUpdate) {
+            //判断id是否一样
+            const tm = this.trademarkList.find(
+              (tm) => tm.id === trademarkForm.id
+            );
+            if (
+              tm.tmName === trademarkForm.tmName &&
+              tm.logoUrl === trademarkForm.logoUrl
+            ) {
+              //若表单内容和图片未进行修改则弹窗警告
+              this.$message.warning('不能提交与之前一样的数据');
+              return;
+            }
+          }
+          //表单验证发送请求
+          let result;
+          //若修改了数据就发请求更新数据
+          if (isUpdate) {
+            result = await this.$API.trademark.updateTradeMark(trademarkForm);
+          } else {
+            //否则就是添加数据
+            result = await this.$API.trademark.addTradeMark(trademarkForm);
+          }
           //判断是否请求成功
           if (result.code === 200) {
             this.$message.success('添加品牌数据成功');
@@ -200,37 +267,34 @@ export default {
         }
       });
     },
-
     //删除品牌数据
-    delTrade(trademarkList) {
-      this.$confirm(`你确定要删除${trademarkList.tmName}吗?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+    delTrade(row) {
+      this.$confirm(`你确定要删除${row.tmName}吗?`, '提示', {
         type: 'warning',
       })
         .then(async () => {
           //发送请求
-          const result = await this.$API.trademark.delTradeMark(
-            trademarkForm.id
+          const result = await this.$API.trademark.delTradeMark(row.id);
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          });
+          //更新数据并判断页面中没有数据时会自动更新页面
+          this.getPageList(
+            this.trademarkList.length == 1 && this.page > 1
+              ? this.page - 1
+              : this.page,
+            this.limit
           );
-          if (result.code === 200) {
+        })
+        .catch((error) => {
+          console.log(222);
+          if (error === 'cancel') {
             this.$message({
-              type: 'success',
-              message: '删除成功!',
-            });
-            this.getPageList(this.page, this.limit);
-          } else {
-            this.$message({
-              type: 'error',
-              message: '删除失败!',
+              type: 'info',
+              message: '已取消删除',
             });
           }
-        })
-        .catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除',
-          });
         });
     },
   },
