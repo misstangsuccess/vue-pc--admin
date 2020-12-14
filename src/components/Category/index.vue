@@ -54,7 +54,7 @@
 
 <script>
 export default {
-  name: 'Categorys',
+  name: 'Category',
   //当禁用表单进是否要显示
   props: ['disabled'],
   data() {
@@ -95,6 +95,7 @@ export default {
       } else {
         this.$message.error(result.message);
       }
+      this.$emit('clearList');
     },
     //当点击2级分类列表时发送请求获取三级分类数据
     async handleSelectChange2(category2Id) {
@@ -107,6 +108,7 @@ export default {
       } else {
         this.$message.error(result.message);
       }
+      this.$emit('clearList');
     },
     //当点击3级分类列表时发送请求获取分类列表对应的属性
     async handleSelectChange3(category3Id) {

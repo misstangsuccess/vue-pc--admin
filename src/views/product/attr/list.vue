@@ -1,9 +1,19 @@
 <template>
   <div>
-    <Categorys @change="getAttrList" :disabled="!isShowList" />
+    <Category
+      @change="getAttrList"
+      @clearList="clearList"
+      :disabled="!isShowList"
+    />
     <!--三级分类数据展示及对应的属性值展示 -->
     <el-card v-show="isShowList" style="margin-top: 20px">
-      <el-button type="primary" icon="el-icon-plus" >添加属性</el-button>
+      <el-button
+        type="primary"
+        icon="el-icon-plus"
+        @click="add"
+        :disabled="!category.category3Id"
+        >添加属性</el-button
+      >
 
       <el-table :data="attrList" border style="width: 100%; margin: 20px 0">
         <el-table-column type="index" label="序号" width="80" align="center">
@@ -104,7 +114,7 @@
 </template>
 
 <script>
-import Categorys from './categorys';
+import Category from '@/components/Category';
 export default {
   name: 'AttrList',
   data() {
@@ -115,6 +125,11 @@ export default {
       attr: {
         attrName: '',
         attrValueList: [],
+      },
+      category: {
+        category1Id: '',
+        category2Id: '',
+        category3Id: '',
       },
     };
   },
@@ -177,11 +192,18 @@ export default {
     },
     //保存数据
     async save() {
+      //判断是否要添加
+      const isAdd = !this.attr.id;
+      const data = this.attr;
+      if (isAdd) {
+        data.categoryId = this.category.category3Id;
+        data.categoryLevel = 3;
+      }
       const result = await this.$API.attrs.saveAttrInfo(this.attr);
       if (result.code === 200) {
         this.$message.success('更新属性成功');
         //调用获取分类列表对应属性的列表的方法
-       this.getAttrList(this.category);
+        this.getAttrList(this.category);
         this.isShowList = true;
       } else {
         this.$message.error(result.message);
@@ -196,9 +218,22 @@ export default {
         return;
       }
     },
+    //添加属性
+    add() {
+      this.isShowList = false;
+      this.attr.attrName = '';
+      this.attr.attrValueList = [];
+    },
+    //清空数据
+    clearList() {
+      //清空数据
+      this.attrList = [];
+      //禁用按钮
+      this.category.category3Id = '';
+    },
   },
   components: {
-    Categorys,
+    Category,
   },
 };
 </script>
