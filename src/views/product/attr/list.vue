@@ -232,6 +232,16 @@ export default {
       this.category.category3Id = '';
     },
   },
+  mounted() {
+    //全局事件总线绑定事件
+    this.$bus.$on('change', this.getAttrList);
+    this.$bus.$on('clearList', this.clearList);
+  },
+  beforeDestroy() {
+    //清空全局事件绑定的事件
+    this.$bus.$off('change', this.getAttrList);
+    this.$bus.$off('clearList', this.clearList);
+  },
   components: {
     Category,
   },

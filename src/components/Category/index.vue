@@ -95,7 +95,7 @@ export default {
       } else {
         this.$message.error(result.message);
       }
-      this.$emit('clearList');
+      this.$bus.$emit('clearList');
     },
     //当点击2级分类列表时发送请求获取三级分类数据
     async handleSelectChange2(category2Id) {
@@ -108,7 +108,7 @@ export default {
       } else {
         this.$message.error(result.message);
       }
-      this.$emit('clearList');
+      this.$bus.$emit('clearList');
     },
     //当点击3级分类列表时发送请求获取分类列表对应的属性
     async handleSelectChange3(category3Id) {
@@ -117,7 +117,7 @@ export default {
         category3Id,
       };
       //子组件向父组件传递参数,触发自定义事件
-      this.$emit('change', category);
+      this.$bus.$emit('change', category);
       /*  const result = await this.$API.attrs.getAttrList(category);
       if (result.code === 200) {
         // console.log(result.data);
