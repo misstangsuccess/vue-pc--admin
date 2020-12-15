@@ -116,7 +116,7 @@ export default {
         ...this.category,
         category3Id,
       };
-      //子组件向父组件传递参数,触发自定义事件
+      //触发自定义事件
       this.$bus.$emit('change', category);
       /*  const result = await this.$API.attrs.getAttrList(category);
       if (result.code === 200) {

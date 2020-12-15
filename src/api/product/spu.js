@@ -35,7 +35,7 @@ export default {
     });
   },
   //更新SPU
-  update (spu) {
+  updateSpu(spu) {
     return request({
       url: `${api_name}/updateSpuInfo`,
       method: "POST",
