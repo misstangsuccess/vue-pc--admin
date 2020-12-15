@@ -43,6 +43,8 @@
               type="danger"
               icon="el-icon-delete"
               size="mini"
+              @onConfirm="delAttrValue($index)"
+              :title="`确定删除 ${row.valueName} 吗？`"
             ></el-button>
           </template>
         </el-table-column>

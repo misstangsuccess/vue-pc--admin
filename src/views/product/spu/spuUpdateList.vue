@@ -24,12 +24,15 @@
       </el-form-item>
       <el-form-item label="SPU图片">
         <el-upload
+          accept="image/*"
           class="avatar-uploader"
           list-type="picture-card"
-          :file-list="imageList"
+          :file-list="formatImageList"
           :action="`${$BASE_API}/admin/product/fileUpload`"
           :on-preview="handlePreview"
           :on-remove="handleRemove"
+          :on-success="handleAvatarSuccess"
+          :before-upload="beforeAvatarUpload"
         >
           <i class="el-icon-plus avatar-uploader-icon"></i>
         </el-upload>
@@ -115,6 +118,15 @@ export default {
     };
   },
   computed: {
+    //处理图片数据格式
+    formatImageList() {
+      return this.imageList.map((img) => {
+        return {
+          name: img.imgName,
+          url: img.imgUrl,
+        };
+      });
+    },
     //过滤所有销售属性列表显示的数量
     filterSaleAttrList() {
       return this.saleAttrList.filter((sale) => {
@@ -122,7 +134,7 @@ export default {
         finde用于数组中的引用类型
         找到了就返回{},布尔值为true,没有找到就是undefined布尔值是false
          */
-        return this.spuSaleAttrList.find((spuSale) => {
+        return !this.spuSaleAttrList.find((spuSale) => {
           spuSale.baseSaleAttrId === sale.id;
         });
       });
@@ -140,21 +152,49 @@ export default {
         this.$message.error(result.message);
       }
     },
+    //文件上传成功的回调函数
+    handleAvatarSuccess(res, file) {
+      // console.log(res);
+      this.imageList.push({
+        imgName: file.name, //图片名称
+        imgUrl: res.data, //图片地址
+        spuId: this.spu.id, //图片Id
+      });
+    },
+    //文件上传之前的回调函数
+    beforeAvatarUpload(file) {
+      //声明图片格式
+      const imgTypes = ['image/jpg', 'image/png', 'image/jpeg'];
+      //判断图片格式
+      const isValidTypes = imgTypes.indexOf(file.type) > -1;
+      //检测文件大小
+      const isLt = file.seze > 1024 < 50;
+      //判断是否上传成功
+      if (!isValidTypes) {
+        this.$message.error('只能上传jpg/png文件格式');
+      }
+      if (!isLt) {
+        this.$message.error('文件大小不超过50kb');
+      }
+      //返回结果
+      return isValidTypes && isLt;
+    },
     //获取所有图片列表
-    async getSpuImageList(spuId) {
+    async getSpuImageList() {
       //从spu中获取id
       const { id } = this.spu;
       const result = await this.$API.spu.getSpuImageList(id);
       if (result.code === 200) {
         this.$message.success('请求所有图片成功~');
         //处理数据格式
-        this.imageList = result.data.map((img) => {
+        /*  this.imageList = result.data.map((img) => {
           return {
             id: img.id,
             name: img.imgName,
             url: img.imgUrl,
           };
-        });
+        }); */
+        this.imageList = result.data;
       } else {
         this.$message.error(result.message);
       }
@@ -166,8 +206,9 @@ export default {
     },
     //删除图片
     handleRemove(file, fileList) {
-      console.log(file, fileList);
-      this.imageList = this.imageList.filter((img) => img.id !== file.id);
+      // console.log(file, fileList);
+      /* this.imageList = this.imageList.filter((img) => img.id == file.id); */
+      this.imageList = this.imageList.filter((img) => img.imgUrl == file.url);
     },
     //获取所有销售列表
     async getSaleAttrList() {

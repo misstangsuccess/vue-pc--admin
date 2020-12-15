@@ -288,7 +288,7 @@ export default {
           );
         })
         .catch((error) => {
-          console.log(222);
+         // console.log(222);
           if (error === 'cancel') {
             this.$message({
               type: 'info',
