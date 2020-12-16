@@ -1,6 +1,12 @@
 <template>
   <el-card style="margin-top: 20px">
-    <el-button type="primary" icon="el-icon-plus">添加SPU</el-button>
+    <el-button
+      type="primary"
+      icon="el-icon-plus"
+      :disabled="!category.category3Id"
+      @click="$emit('showUpdateList', { category3Id: category.category3Id })"
+      >添加SPU</el-button
+    >
     <el-table
       :data="spuList"
       v-loading="loading"
@@ -13,7 +19,12 @@
       <el-table-column prop="description" label="SPU描述"> </el-table-column>
       <el-table-column label="操作">
         <template v-slot="{ row }">
-          <el-button type="primary" icon="el-icon-plus" size="mini"></el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            size="mini"
+            @click="$emit('showSpuList', { ...row, ...category })"
+          ></el-button>
           <el-button
             type="primary"
             icon="el-icon-edit"
@@ -72,7 +83,7 @@ export default {
         limit,
         category3Id,
       });
-      console.log(result);
+      //console.log(result);
       if (result.code === 200) {
         this.$message.success('请求SPU分页列表成功');
         this.spuList = result.data.records;

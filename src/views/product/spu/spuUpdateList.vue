@@ -230,8 +230,14 @@ export default {
           spuImageList: this.imageList,
           spuSaleAttrList: this.spuSaleAttrList,
         };
-        //发送请求
-        const result = await this.$API.spu.updateSpu(spu);
+        //先判断是否有id然后再决定发什么请求
+        //若有Id则更新,没有的则添加
+        let result;
+        if (this.spu.id) {
+          result = await this.$API.spu.updateSpu(spu);
+        } else {
+          result = await this.$API.spu.saveSPU(spu);
+        }
         if (result.code === 200) {
           //触发事件跳转到showlist页面
           this.$emit('showList', this.spu.category3Id);
@@ -239,7 +245,8 @@ export default {
           /*   this.$nextTick(() => {
             this.$bus.$emit('change', { category3Id: this.spu.category3Id });
           }); */
-          this.$message.success('更新SPU数据成功~');
+          /* this.$message.success('更新SPU数据成功~'); */
+          this.$message.success(`${this.spu.id ? '更新' : '添加'}SPU成功~`);
         } else {
           this.$message.error(result.message);
         }
@@ -404,9 +411,12 @@ export default {
   },
   async mounted() {
     this.getTrademarkList();
-    this.getSpuImageList();
     this.getSaleAttrList();
-    this.getSpuSaleAttrList();
+    //判断是否有id再发什么请求
+    if (this.spu.id) {
+      this.getSpuImageList();
+      this.getSpuSaleAttrList();
+    }
   },
 };
 </script>
