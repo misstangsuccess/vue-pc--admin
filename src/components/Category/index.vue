@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex';
 export default {
   name: 'Category',
   //当禁用表单进是否要显示
@@ -66,58 +67,78 @@ export default {
         category3Id: '',
       },
       //定义分类列表数据
-      category1List: [],
+      /*  category1List: [],
       category2List: [],
-      category3List: [],
+      category3List: [], */
     };
+  },
+  computed: {
+    ...mapState({
+      category1List: (state) => state.category.category1List,
+      category2List: (state) => state.category.category2List,
+      category3List: (state) => state.category.category3List,
+    }),
   },
   //发送请求获取1级分类数据,然后再遍历展示
   async mounted() {
-    const result = await this.$API.attrs.getCategorys1();
+    this['category/getcategory1List']();
+    /*  const result = await this.$API.attrs.getCategorys1();
     // console.log(result.data);
     if (result.code === 200) {
       this.category1List = result.data;
     } else {
       this.$message.error(result.message);
-    }
+    } */
   },
   methods: {
+    //调用vuex中的actions和mutations函数,并且用了命名空间的方式
+    //那在书写方式上需要携带上文件路径名,才能起作用
+    ...mapActions([
+      'category/getcategory1List',
+      'category/getcategory2List',
+      'category/getcategory3List',
+    ]),
+    ...mapMutations(['category/SET_CATEGORY3_ID']),
     //当点击1级分类列表时发送请求获取二级分类数据
     async handleSelectChange1(category1Id) {
       //当再次选择数据时,二级分类和三级分类的数据应该清空
-      this.category2List = [];
-      this.category3List = [];
+      /*   this.category2List = [];
+      this.category3List = []; */
       this.category.category2Id = '';
       this.category.category3Id = '';
-      const result = await this.$API.attrs.getCategorys2(category1Id);
+      //调用vuex中的actions函数去发请求
+      this['category/getcategory2List'](category1Id);
+      /*   const result = await this.$API.attrs.getCategorys2(category1Id);
       if (result.code === 200) {
         this.category2List = result.data;
       } else {
         this.$message.error(result.message);
-      }
-      this.$bus.$emit('clearList');
+      } */
+      //this.$bus.$emit('clearList');
     },
     //当点击2级分类列表时发送请求获取三级分类数据
     async handleSelectChange2(category2Id) {
       //当再次选择数据时,三级分类的数据应该清空
-      this.category3List = [];
+      /* this.category3List = []; */
       this.category.category3Id = '';
-      const result = await this.$API.attrs.getCategorys3(category2Id);
+      /*    const result = await this.$API.attrs.getCategorys3(category2Id);
       if (result.code === 200) {
         this.category3List = result.data;
       } else {
         this.$message.error(result.message);
-      }
-      this.$bus.$emit('clearList');
+      } */
+      this['category/getcategory3List'](category2Id);
+      // this.$bus.$emit('clearList');
     },
     //当点击3级分类列表时发送请求获取分类列表对应的属性
     async handleSelectChange3(category3Id) {
-      const category = {
+      this['category/SET_CATEGORY3_ID'](category3Id);
+      /*  const category = {
         ...this.category,
         category3Id,
-      };
+      }; */
       //触发自定义事件
-      this.$bus.$emit('change', category);
+      //  this.$bus.$emit('change', category);
       /*  const result = await this.$API.attrs.getAttrList(category);
       if (result.code === 200) {
         // console.log(result.data);

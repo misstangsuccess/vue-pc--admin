@@ -55,6 +55,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
   name: 'SpuShowList',
   data() {
@@ -63,13 +64,37 @@ export default {
       total: 0,
       limit: 3,
       spuList: [],
-      category: {
+      /*   category: {
         category1Id: '',
         category2Id: '',
         category3Id: '',
-      },
+      }, */
       loading: false,
     };
+  },
+  computed: {
+    ...mapState({
+      category: (state) => state.category.category,
+    }),
+  },
+  //当有了3级分类id时可以通过watch监视属性监视数据的变化,不仅可以监视对象,还可以监视对象的属性
+  watch: {
+    'category.category3Id': {
+      handler(category3Id) {
+        if (!category3Id) return;
+        this.getPageList(this.page, this.limit);
+      },
+      //一上来就立即调用
+      immediate: true,
+    },
+    'category.category1Id'() {
+      //调用清空数据的方法
+      this.clearList();
+    },
+    'category.category2Id'() {
+      //调用清空数据的方法
+      this.clearList();
+    },
   },
   methods: {
     //获取分页列表数据
@@ -94,28 +119,28 @@ export default {
       this.loading = false;
     },
     //选中三级分类时把传递过去,并调用函数
-    handleCategoryChange(category) {
+    /*    handleCategoryChange(category) {
       this.category = category;
       this.getPageList(this.page, this.limit);
-    },
+    }, */
     //选中1级分类和2级分类数据时需要清空数据
     clearList() {
       this.spuList = [];
       this.page = 1;
       this.total = 0;
       this.limit = 3;
-      this.category.category3Id = '';
+      /*  this.category.category3Id = ''; */
     },
   },
   mounted() {
     //全局事件总线绑定事件
-    this.$bus.$on('change', this.handleCategoryChange);
-    this.$bus.$on('clearList', this.clearList);
+    // this.$bus.$on('change', this.handleCategoryChange);
+    // this.$bus.$on('clearList', this.clearList);
   },
   beforeDestroy() {
     //清空全局事件绑定的事件
-    this.$bus.$off('change', this.handleCategoryChange);
-    this.$bus.$off('clearList', this.clearList);
+    // this.$bus.$off('change', this.handleCategoryChange);
+    //this.$bus.$off('clearList', this.clearList);
   },
 };
 </script>

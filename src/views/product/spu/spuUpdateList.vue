@@ -129,7 +129,8 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="save">保存</el-button>
-        <el-button @click="$emit('showList', spu.category3Id)">取消</el-button>
+        <!--  <el-button @click="$emit('showList', spu.category3Id)">取消</el-button> -->
+        <el-button @click="$emit('showList')">取消</el-button>
       </el-form-item>
     </el-form>
     <el-dialog :visible.sync="visible">
@@ -139,6 +140,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
   name: 'SpuUpdateList',
   //接收父组件传递过来的数据,由于是只读不能修改所以需要定义一个数据
@@ -166,6 +168,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      category: (state) => state.category.category,
+    }),
     //处理图片数据格式
     formatImageList() {
       return this.imageList.map((img) => {
@@ -225,8 +230,14 @@ export default {
           console.log('校验通过');
         }
         //收集数据
+        /*   const spu = {
+          ...this.spu, //展开数据
+          spuImageList: this.imageList,
+          spuSaleAttrList: this.spuSaleAttrList,
+        }; */
         const spu = {
           ...this.spu, //展开数据
+          category3Id: this.category.category3Id,
           spuImageList: this.imageList,
           spuSaleAttrList: this.spuSaleAttrList,
         };
@@ -240,7 +251,8 @@ export default {
         }
         if (result.code === 200) {
           //触发事件跳转到showlist页面
-          this.$emit('showList', this.spu.category3Id);
+          this.$emit('showList');
+          /*  this.$emit('showList', this.spu.category3Id); */
           //showlist页面展示updatelist的数据(方法一,也可以在父组件触发)
           /*   this.$nextTick(() => {
             this.$bus.$emit('change', { category3Id: this.spu.category3Id });

@@ -75,8 +75,8 @@
             第一个标签绑定相应原生DOM事件
              -->
             <el-input
-              size="mini"
               v-if="row.edit"
+              size="mini"
               v-model="row.valueName"
               autofocus
               ref="input"
@@ -85,8 +85,8 @@
             ></el-input>
             <!-- $set方法给对象添加的新属性可以是响应式数据 -->
             <span
-              style="display: block; width: 100%"
               v-else
+              style="display: block; width: 100%"
               @click="edit(row)"
               >{{ row.valueName }}</span
             >
@@ -116,6 +116,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import Category from '@/components/Category';
 export default {
   name: 'AttrList',
@@ -128,12 +129,31 @@ export default {
         attrName: '',
         attrValueList: [],
       },
-      category: {
+      /*  category: {
         category1Id: '',
         category2Id: '',
         category3Id: '',
-      },
+      }, */
     };
+  },
+  computed: {
+    ...mapState({
+      category: (state) => state.category.category,
+    }),
+  },
+  watch: {
+    'category.category3Id'(category3Id) {
+      if (!category3Id) return;
+      this.getAttrList();
+    },
+    'category.category1Id'() {
+      //调用清空数据的方法
+      this.clearList();
+    },
+    'category.category2Id'() {
+      //调用清空数据的方法
+      this.clearList();
+    },
   },
   /*  数据结构
    attrList:Array[1]
@@ -148,9 +168,18 @@ export default {
 
  */
   methods: {
+    async getAttrList() {
+      /* this.category = category; */
+      const result = await this.$API.attrs.getAttrList(this.category);
+      if (result.code === 200) {
+        this.attrList = result.data;
+      } else {
+        this.$message.error(result.message);
+      }
+    },
     /* 定义自定义方法接收子组件传递过来的数据,
     并发送请求获取分类列表对应的属性值 */
-    async getAttrList(category) {
+    /* async getAttrList(category) {
       this.category = category;
       const result = await this.$API.attrs.getAttrList(category);
       if (result.code === 200) {
@@ -158,7 +187,7 @@ export default {
       } else {
         this.$message.error(result.message);
       }
-    },
+    }, */
     /* 更新数据 */
     update(attr) {
       //为了修改当前的attr时会修改原数据,但是这个是浅度克隆,还是会影响原数据
@@ -204,9 +233,9 @@ export default {
       const result = await this.$API.attrs.saveAttrInfo(this.attr);
       if (result.code === 200) {
         this.$message.success('更新属性成功');
-        //调用获取分类列表对应属性的列表的方法
-        this.getAttrList(this.category);
         this.isShowList = true;
+        //调用获取分类列表对应属性的列表的方法
+        this.getAttrList();
       } else {
         this.$message.error(result.message);
       }
@@ -219,6 +248,7 @@ export default {
         // this.$message.warning('请输入属性名称');
         return;
       }
+       row.edit = false;
     },
     //添加属性
     add() {
@@ -236,13 +266,13 @@ export default {
   },
   mounted() {
     //全局事件总线绑定事件
-    this.$bus.$on('change', this.getAttrList);
-    this.$bus.$on('clearList', this.clearList);
+    /*  this.$bus.$on('change', this.getAttrList);
+    this.$bus.$on('clearList', this.clearList); */
   },
   beforeDestroy() {
     //清空全局事件绑定的事件
-    this.$bus.$off('change', this.getAttrList);
-    this.$bus.$off('clearList', this.clearList);
+    /* this.$bus.$off('change', this.getAttrList);
+    this.$bus.$off('clearList', this.clearList); */
   },
   components: {
     Category,

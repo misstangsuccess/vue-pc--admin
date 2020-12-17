@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SkuList v-if="isShowSkuList" :skuItem="skuItem" />
+    <SkuList v-if="isShowSkuList" :spuItem="spuItem" />
     <div v-else>
       <Category :disabled="!isShowList" />
       <!--三级分类数据展示及对应的属性值展示 -->
@@ -31,27 +31,29 @@ export default {
       //定义数据是为了给子组件传递数据使用
       item: {},
       //定义sku的列表数据
-      skuItem: {},
+      spuItem: {},
     };
   },
   methods: {
     //把spu页面中的数据在sku中展示
     showSpuList(row) {
       this.isShowSkuList = true;
-      this.skuItem = { ...row };
+      this.spuItem = { ...row };
     },
     //数据传给SpuUpdateList组件,方法传给SpuShowList
     showUpdateList(row) {
       this.isShowList = false;
       this.item = { ...row };
     },
-    showList(category3Id) {
+    showList(category) {
       this.isShowList = true;
+      //通知showlistx组件重新发请求
+
       //等showlist组件加载完后再触发事件(方法二,也可以在子组件中触发)
-      this.$nextTick(() => {
-        console.log(111);
-        this.$bus.$emit('change', { category3Id });
-      });
+      // this.$nextTick(() => {
+      // //  console.log(111);
+      //   this.$bus.$emit('change', { category3Id });
+      // });
     },
   },
   components: {
