@@ -150,11 +150,9 @@ export default {
     // this.$bus.$on('change', this.handleCategoryChange);
     // this.$bus.$on('clearList', this.clearList);
   },
-  beforeDestroy() {
-    //清空全局事件绑定的事件
-    // this.$bus.$off('change', this.handleCategoryChange);
-    //this.$bus.$off('clearList', this.clearList);
-  },
+  //清空全局事件绑定的事件
+  // this.$bus.$off('change', this.handleCategoryChange);
+  //this.$bus.$off('clearList', this.clearList);
 };
 </script>
 

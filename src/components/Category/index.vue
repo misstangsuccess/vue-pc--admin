@@ -59,12 +59,17 @@ export default {
   //当禁用表单进是否要显示
   props: ['disabled'],
   data() {
+    const { category } = this.$store.state.category;
+    console.log(category, '1111');
     return {
       //定义分类id
       category: {
-        category1Id: '',
+        /* category1Id: '',
         category2Id: '',
-        category3Id: '',
+        category3Id: '', */
+        category1Id: category.category1Id,
+        category2Id: category.category2Id,
+        category3Id: category.category3Id,
       },
       //定义分类列表数据
       /*  category1List: [],
@@ -82,6 +87,7 @@ export default {
   //发送请求获取1级分类数据,然后再遍历展示
   async mounted() {
     this['category/getcategory1List']();
+
     /*  const result = await this.$API.attrs.getCategorys1();
     // console.log(result.data);
     if (result.code === 200) {

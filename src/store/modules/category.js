@@ -97,9 +97,10 @@ export default {
     },
     //组件切换清空数据
     RESET_CATEGORY_ID (state) {
+      console.log('asdasdasdasdasdasdasd')
       state.category.category1Id = "";
-      state.category.category1Id = "";
-      state.category.category1Id = "";
+      state.category.category2Id = "";
+      state.category.category3Id = "";
     }
 
   }

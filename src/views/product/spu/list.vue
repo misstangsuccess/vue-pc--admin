@@ -1,6 +1,6 @@
 <template>
   <div>
-    <SkuList v-if="isShowSkuList" :spuItem="spuItem" />
+    <SkuList v-if="isShowSkuList" :spuItem="spuItem" @showList="showList" />
     <div v-else>
       <Category :disabled="!isShowList" />
       <!--三级分类数据展示及对应的属性值展示 -->
@@ -45,10 +45,10 @@ export default {
       this.isShowList = false;
       this.item = { ...row };
     },
-    showList(category) {
+    //展示showlist组件的数据
+    showList() {
       this.isShowList = true;
-      //通知showlistx组件重新发请求
-
+      this.isShowSkuList = false;
       //等showlist组件加载完后再触发事件(方法二,也可以在子组件中触发)
       // this.$nextTick(() => {
       // //  console.log(111);
@@ -57,9 +57,11 @@ export default {
     },
   },
   //切换组件时清空数据
-  beforeDestory() {
+  beforeDestroy() {
     this.$store.commit('category/RESET_CATEGORY_ID');
   },
+
+
   components: {
     Category,
     SpuShowList,
