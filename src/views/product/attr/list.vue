@@ -39,13 +39,18 @@
               size="mini"
               @click="update(row)"
             ></el-button>
-            <el-button
-              type="danger"
-              icon="el-icon-delete"
-              size="mini"
-              @onConfirm="delAttrValue($index)"
-              :title="`确定删除 ${row.valueName} 吗？`"
-            ></el-button>
+            <el-popconfirm
+              :title="`您确定删除${row.attrName}吗?`"
+              @onConfirm="deleteAttr(row.id)"
+            >
+              <el-button
+                type="primary"
+                slot="reference"
+                icon="el-icon-delete"
+                size="mini"
+                >删除</el-button
+              >
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -141,6 +146,7 @@ export default {
       category: (state) => state.category.category,
     }),
   },
+  //监视数据变化
   watch: {
     'category.category3Id'(category3Id) {
       if (!category3Id) return;
@@ -248,7 +254,7 @@ export default {
         // this.$message.warning('请输入属性名称');
         return;
       }
-       row.edit = false;
+      row.edit = false;
     },
     //添加属性
     add() {
@@ -263,6 +269,13 @@ export default {
       //禁用按钮
       this.category.category3Id = '';
     },
+    //删除整行的销售属性值
+    async deleteAttr(attrId) {
+      const result = await this.$API.attrs.deleteAttr(attrId);
+      /* console.log(result + '~~~~~~~~~~'); */
+      this.$message.success(result.message || '删除属性成功');
+      this.getAttrList();
+    },
   },
   mounted() {
     //全局事件总线绑定事件
@@ -273,6 +286,8 @@ export default {
     //清空全局事件绑定的事件
     /* this.$bus.$off('change', this.getAttrList);
     this.$bus.$off('clearList', this.clearList); */
+    //切换组件时清空数据
+    this.$store.commit('category/RESET_CATEGORY_ID');
   },
   components: {
     Category,

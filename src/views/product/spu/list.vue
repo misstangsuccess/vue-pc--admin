@@ -56,6 +56,10 @@ export default {
       // });
     },
   },
+  //切换组件时清空数据
+  beforeDestory() {
+    this.$store.commit('category/RESET_CATEGORY_ID');
+  },
   components: {
     Category,
     SpuShowList,

@@ -32,11 +32,18 @@
             @click="$emit('showUpdateList', row)"
           ></el-button>
           <el-button type="info" icon="el-icon-info" size="mini"></el-button>
-          <el-button
-            type="danger"
-            icon="el-icon-delete"
-            size="mini"
-          ></el-button>
+          <el-popconfirm
+            :title="`您确定删除${row.spuName}吗?`"
+            @onConfirm="deleteSpu(row.id)"
+          >
+            <el-button
+              type="primary"
+              slot="reference"
+              icon="el-icon-delete"
+              size="mini"
+              >删除</el-button
+            >
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -130,6 +137,12 @@ export default {
       this.total = 0;
       this.limit = 3;
       /*  this.category.category3Id = ''; */
+    },
+    //删除整行的spu数据
+    async deleteSpu(spuId) {
+      const result = await this.$API.spu.deleteSpu(spuId);
+      this.$message.success(result.message || '删除成功');
+      this.getPageList(this.page, this.limit);
     },
   },
   mounted() {

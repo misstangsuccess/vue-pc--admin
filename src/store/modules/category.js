@@ -94,6 +94,12 @@ export default {
     //当点击3级id时直接更新数据
     SET_CATEGORY3_ID (state, category3Id) {
       state.category.category3Id = category3Id
+    },
+    //组件切换清空数据
+    RESET_CATEGORY_ID (state) {
+      state.category.category1Id = "";
+      state.category.category1Id = "";
+      state.category.category1Id = "";
     }
 
   }

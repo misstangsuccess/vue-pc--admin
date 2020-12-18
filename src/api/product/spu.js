@@ -18,7 +18,7 @@ export default {
   /*
   删除SPU
   */
-  deleteSPU (spuId) {
+  deleteSpu (spuId) {
     return request({
       url: `${api_name}/deleteSpu/${spuId}`,
       method: "DELETE"
@@ -35,7 +35,7 @@ export default {
     });
   },
   //更新SPU
-  updateSpu(spu) {
+  updateSpu (spu) {
     return request({
       url: `${api_name}/updateSpuInfo`,
       method: "POST",
