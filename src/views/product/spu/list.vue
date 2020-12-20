@@ -9,6 +9,7 @@
         v-if="isShowList"
         @showUpdateList="showUpdateList"
         @showSpuList="showSpuList"
+        @showSkuList="showSkuList"
       />
       <!-- 对相应属性值进行修改删除操作 -->
       <SpuUpdateList v-else :item="item" @showList="showList" />
@@ -32,6 +33,8 @@ export default {
       item: {},
       //定义sku的列表数据
       spuItem: {},
+      //定义sku数据
+      skuItem: {},
     };
   },
   methods: {
@@ -55,12 +58,17 @@ export default {
       //   this.$bus.$emit('change', { category3Id });
       // });
     },
+    //展示skuList组件的数据
+    showSkuList(row) {
+      this.isShowList = true;
+      this.isShowSkuList = false;
+      this.skuItem = { ...row };
+    },
   },
   //切换组件时清空数据
   beforeDestroy() {
     this.$store.commit('category/RESET_CATEGORY_ID');
   },
-
 
   components: {
     Category,

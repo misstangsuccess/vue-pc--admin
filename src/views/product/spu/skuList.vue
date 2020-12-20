@@ -219,7 +219,7 @@ export default {
         this.imageList = result.data.map((img) => {
           return {
             ...img,
-            isCheck: true,
+           // isCheck: true,
           };
         });
       } else {

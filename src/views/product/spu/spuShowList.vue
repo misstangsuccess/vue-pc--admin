@@ -31,7 +31,12 @@
             size="mini"
             @click="$emit('showUpdateList', row)"
           ></el-button>
-          <el-button type="info" icon="el-icon-info" size="mini"></el-button>
+          <el-button
+            type="info"
+            icon="el-icon-info"
+            size="mini"
+            @click="$emit('showSkuList', row)"
+          ></el-button>
           <el-popconfirm
             :title="`您确定删除${row.spuName}吗?`"
             @onConfirm="deleteSpu(row.id)"
@@ -65,6 +70,7 @@
 import { mapState } from 'vuex';
 export default {
   name: 'SpuShowList',
+  props: { skuItem: Object },
   data() {
     return {
       page: 1,
@@ -77,6 +83,7 @@ export default {
         category3Id: '',
       }, */
       loading: false,
+      sku: this.skuItem, //重新定义数据为了后来操作使用
     };
   },
   computed: {

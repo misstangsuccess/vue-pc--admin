@@ -1,6 +1,8 @@
-import { login as loginAPI } from '@/api'
+// import { login as loginAPI } from '@/api'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { resetRouter } from '@/router'
+import API from "@/api"
+const loginAPI = API.login
 
 const getDefaultState = () => {
   return {
@@ -37,10 +39,10 @@ const mutations = {
 }
 
 const actions = {
-  /* 
+  /*
   异步登陆
   */
-  login({ commit }, userInfo) {
+  login ({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       loginAPI.login(username.trim(), password).then(result => {
@@ -54,10 +56,10 @@ const actions = {
     })
   },
 
-  /* 
+  /*
   异步获取用户信息
   */
-  getInfo({ commit }) {
+  getInfo ({ commit }) {
     return new Promise((resolve, reject) => {
       loginAPI.getInfo().then(result => {
         const { data } = result
@@ -86,10 +88,10 @@ const actions = {
     })
   },
 
-  /* 
+  /*
   退出登陆
   */
-  logout({ commit }) {
+  logout ({ commit }) {
     return new Promise((resolve, reject) => {
       loginAPI.logout().then(() => {
         removeToken() // must remove  token  first
@@ -102,11 +104,11 @@ const actions = {
     })
   },
 
-  /* 
+  /*
   删除token与重置状态
   */
-  async resetToken({ commit }) {
-    /* 
+  async resetToken ({ commit }) {
+    /*
     return new Promise(resolve => {
       removeToken() // must remove  token  first
       commit('RESET_STATE')

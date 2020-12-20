@@ -1,4 +1,5 @@
-import * as API from '@/api'
+/* import * as API from '@/api' */
+import API from "@/api"
 import { Message } from "element-ui"
 export default {
   //命名空间方式,为了避免命名冲突

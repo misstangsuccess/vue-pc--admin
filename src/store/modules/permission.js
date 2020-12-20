@@ -1,19 +1,21 @@
 import { constantRoutes, lastRoute } from '@/router'
-import { login as loginAPI} from '@/api'
+/* import { login as loginAPI} from '@/api' */
+import API from "@/api"
 import Layout from '@/layout'
 import asyncRoutes from '@/config/asyncRoutes'
+const loginAPI = API.login
 
 /*
 根据路由权限列表生成路由列表
 主要工作就是将组件路径转换为对应的异步路由组件
 */
-function generateAsyncRoutes(permissionList) {
+function generateAsyncRoutes (permissionList) {
 
   const accessedRoutes = permissionList.filter(route => {
     // 得到路由组件名称字符串
     let component = route.component
     if (component) {
-      if (component==='Layout') {
+      if (component === 'Layout') {
         route.component = Layout
       } else if (asyncRoutes[component]) {
         route.component = asyncRoutes[component].component
@@ -60,7 +62,7 @@ const actions = {
   /*
   异步生成当前用户的所有路由
   */
-  async generateRoutes({ commit }) {
+  async generateRoutes ({ commit }) {
     // 异步获取当前用户权限数据
     const result = await loginAPI.getMenu()
     // 取出权限列表
