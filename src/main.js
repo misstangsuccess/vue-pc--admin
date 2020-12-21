@@ -1,5 +1,4 @@
 import Vue from 'vue'
-
 // 引入专门的reset.css模块
 import 'normalize.css/normalize.css'
 
@@ -45,6 +44,8 @@ import CategorySelector from '@/components/CategorySelector'
 // 注册全局组件
 Vue.component('HintButton', HintButton)
 Vue.component('CategorySelector', CategorySelector)
+import ViserVue from "viser-vue"
+Vue.use(ViserVue)
 
 // 挂载到Vue原型对象上, 以便组件中直接可见
 Vue.prototype.$hasBP = hasBtnPermission

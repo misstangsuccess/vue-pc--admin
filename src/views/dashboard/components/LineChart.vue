@@ -1,122 +1,126 @@
 <template>
-  <div :class="className" :style="{height,width}" />
+  <div ref="LineChartContainer" class="line-chart-container"></div>
 </template>
 
 <script>
-import echarts from 'echarts'
-require('echarts/theme/macarons') // echarts theme
-import resize from './mixins/resize'
+import Echarts from 'echarts';
+/* 引入主题颜色包 */
+import 'echarts/theme/macarons';
+import resize from './mixins/resize';
 
 export default {
+  name: 'LineChart',
   mixins: [resize],
   props: {
-    className: {
-      type: String,
-      default: 'chart'
-    },
-    width: {
-      type: String,
-      default: '100%'
-    },
-    height: {
-      type: String,
-      default: '350px'
-    },
     chartData: {
       type: Object,
-      required: true
+      required: true,
     },
     yTittle: {
       type: String,
-      required: true
-    }
-  },
-  data() {
-    return {
-      chart: null
-    }
-  },
-  watch: {
-    chartData: {
-      deep: true,
-      handler(val) {
-        this.setOptions(val)
-      }
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.initChart()
-    })
-  },
-  beforeDestroy() {
-    if (!this.chart) {
-      return
-    }
-    this.chart.dispose()
-    this.chart = null
+      requird: true,
+    },
   },
   methods: {
+    //初始化echarts
     initChart() {
-      this.chart = echarts.init(this.$el, 'macarons')
-      this.setOptions(this.chartData)
+      this.chart = Echarts.init(this.$refs.LineChartContainer, 'macarons');
     },
-    setOptions({ expectedData, actualData } = {}) {
-      this.chart.setOption({
-        // x轴
-        xAxis: {
-          data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-          boundaryGap: false, // 坐标轴右侧是否留白, 默认是true
-        },
-        // 坐标系内绘图网格
-        grid: {
-          left: 10,
-          right: 10,
-          bottom: 20,
-          top: 30,
-          containLabel: true
-        },
-        // 提示
+    //定义option
+    setOption({ expectedData, actualData }) {
+      const option = {
+        /*  title: {
+          text: '堆叠区域图',
+        }, */
+        //提示十字架
         tooltip: {
-          trigger: 'axis', // 坐标轴触发
-          axisPointer: { // 坐标轴指示器配置项
-            type: 'cross' //  十字准星指示器。表示启用两个正交的轴的 axisPointer
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: 'skublue',
+            },
           },
         },
-        // y轴
-        yAxis: {
-          name: this.yTittle, // 动态标题
-        },
-        // 图例
+        //代表有几种数据
         legend: {
-          data: ['预期', '实际'] // 与系列的name匹配
+          data: ['预期', '实际'],
         },
-        series: [{
-          name: '预期', 
-          type: 'line',
-          smooth: true, // 线条光滑
-          itemStyle: {
-            color: "#FF005A",
+        /*  toolbox: {//下载
+          feature: {
+            saveAsImage: {},
           },
-          areaStyle: { // 区域填充
-            color: '#ccc'
-          },
-          data: expectedData,
-          animationDuration: 2800, // 显示动画时间
+        }, */
+        grid: {
+          left: '1%',
+          right: '1%',
+          bottom: '1%',
+          containLabel: true, //充满整个容器,防止溢出
         },
-        {
-          name: '实际',
-          smooth: true,
-          type: 'line',
-          itemStyle: {
-            color: '#3888fa',
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
           },
-          data: actualData,
-          animationDuration: 2800,
-          animationEasing: 'quadraticOut'
-        }]
-      })
-    }
-  }
-}
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '交易金额(万元)',
+          },
+        ],
+        //数据
+        series: [
+          {
+            name: '预期',
+            type: 'line',
+            /* stack: '总量', */
+            /* areaStyle: {}, */
+            data: expectedData,
+            smooth: true, //平滑线
+            lineStyle: {
+              //线条颜色
+              color: 'blue',
+            },
+          },
+          {
+            name: '实际',
+            type: 'line',
+            /* stack: '总量', */
+            areaStyle: {
+              //区域颜色
+              color: 'gray',
+              opacity: 0.3,
+            },
+            data: actualData,
+            smooth: true, //平滑线
+            lineStyle: {
+              //线条颜色
+              color: 'red',
+            },
+          },
+        ],
+      };
+      //调用生成图表
+      this.chart.setOption(option);
+    },
+  },
+  watch: {
+    //更新图表时同时更新数据
+    chartData({ expectedData, actualData }) {
+      this.setOption({ expectedData, actualData });
+    },
+  },
+  mounted() {
+    //初始化调用
+    this.initChart();
+  },
+};
 </script>
+
+<style lang="sass">
+.line-chart-container
+  width: 100%
+  height: 400px
+</style>
